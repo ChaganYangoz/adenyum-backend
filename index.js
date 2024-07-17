@@ -76,6 +76,54 @@ app.post("/addstratejik", async (req, res) => {
   }
 });
 
+app.post("/addkontrol", async (req, res) => {
+  const kontrol = req.body;
+  const client = await MongoClient.connect(
+    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  );
+  const db = client.db("adenyum");
+  const collection = db.collection("kontrolnoktasi");
+
+  try {
+    await collection.insertOne(kontrol);
+    res.status(201).send("Data saved successfully");
+  } catch (error) {
+    res.status(500).send("Failed to save data");
+  }
+});
+
+app.post("/addrisk", async (req, res) => {
+  const risk = req.body;
+  const client = await MongoClient.connect(
+    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  );
+  const db = client.db("adenyum");
+  const collection = db.collection("riskanaliz");
+
+  try {
+    await collection.insertOne(risk);
+    res.status(201).send("Data saved successfully");
+  } catch (error) {
+    res.status(500).send("Failed to save data");
+  }
+});
+
+app.post("/adducret", async (req, res) => {
+  const ucret = req.body;
+  const client = await MongoClient.connect(
+    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  );
+  const db = client.db("adenyum");
+  const collection = db.collection("ucretyonetimi");
+
+  try {
+    await collection.insertOne(ucret);
+    res.status(201).send("Data saved successfully");
+  } catch (error) {
+    res.status(500).send("Failed to save data");
+  }
+});
+
 app.post("/update/:dbName", async (req, res) => {
   const { dbName } = req.params; // URL parametresinden dbName'i al
   const { id, value } = req.body;
@@ -155,6 +203,90 @@ app.post("/updateSorumlu/:id", async (req, res) => {
   }
 });
 
+app.post("/updatekontrol/:id", async (req, res) => {
+  const { id } = req.params;
+  const updated = req.body;
+
+  const uri =
+    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+  const client = new MongoClient(uri);
+
+  try {
+    await client.connect(); // MongoDB'ye bağlan
+
+    const db = client.db("adenyum");
+    const collection = db.collection("kontrolnoktasi");
+
+    const filter = { _id: new ObjectId(id) }; // Güncellenecek belirli veriye göre filtrele
+
+    const updateDoc = {
+      $set: {
+        departman: updated.departman,
+        kontrolnoktasi: updated.kontrolnoktasi,
+        agirlik: updated.agirlik,
+        durum: updated.durum,
+        puan: updated.puan,
+        aciklama: updated.aciklama,
+      },
+    };
+
+    const result = await collection.updateOne(filter, updateDoc); // Veriyi güncelle
+
+    console.log(`${result.matchedCount} belge güncellendi`);
+    res
+      .status(200)
+      .json({ message: `${result.matchedCount} belge güncellendi` });
+  } catch (error) {
+    console.error("Veri güncelleme hatası:", error);
+    res.status(500).json({ error: "Veri güncelleme hatası" });
+  } finally {
+    await client.close(); // Bağlantıyı kapat
+  }
+});
+
+app.post("/updateucret/:id", async (req, res) => {
+  const { id } = req.params;
+  const updated = req.body;
+
+  const uri =
+    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+  const client = new MongoClient(uri);
+
+  try {
+    await client.connect(); // MongoDB'ye bağlan
+
+    const db = client.db("adenyum");
+    const collection = db.collection("ucretyonetimi");
+
+    const filter = { _id: new ObjectId(id) }; // Güncellenecek belirli veriye göre filtrele
+
+    const updateDoc = {
+      $set: {
+        derece: updated.derece,
+        departman: updated.departman,
+        agirlik: updated.agirlik,
+        anamaas: updated.anamaas,
+        performans: updated.performans,
+        toplam_maas: updated.toplam_maas,
+      },
+    };
+
+    const result = await collection.updateOne(filter, updateDoc); // Veriyi güncelle
+
+    console.log(`${result.matchedCount} belge güncellendi`);
+    res
+      .status(200)
+      .json({ message: `${result.matchedCount} belge güncellendi` });
+  } catch (error) {
+    console.error("Veri güncelleme hatası:", error);
+    res.status(500).json({ error: "Veri güncelleme hatası" });
+  } finally {
+    await client.close(); // Bağlantıyı kapat
+  }
+});
+
 app.post("/updatestrat", async (req, res) => {
   const { id } = req.body;
 
@@ -193,7 +325,6 @@ app.post("/updatestrat", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   const { ad, sifre } = req.body;
-  console.log(ad, sifre);
 
   const uri =
     "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
@@ -209,10 +340,40 @@ app.post("/login", async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, "secretkey", { expiresIn: "1h" });
 
-    res.json({ token, id: user._id, ad: user.ad });
+    res.json({ token, id: user._id, ad: user.ad, rol: user.rol });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.post("/delete/:dbName", async (req, res) => {
+  const { dbName } = req.params; // URL parametresinden dbName'i al
+  const { id } = req.body;
+
+  const uri =
+    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+  const client = new MongoClient(uri);
+
+  try {
+    await client.connect(); // MongoDB'ye bağlan
+
+    const db = client.db("adenyum");
+
+    const result = await db
+      .collection(dbName)
+      .deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).send({ message: "Item not found" });
+    }
+
+    res.status(200).send({ message: "Item deleted successfully" });
+  } catch (error) {
+    res.status(500).send({ message: "Error deleting item", error });
+  } finally {
+    await client.close(); // Bağlantıyı kapat
   }
 });
 
