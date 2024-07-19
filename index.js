@@ -377,6 +377,106 @@ app.post("/delete/:dbName", async (req, res) => {
   }
 });
 
+app.post("/count/:variable", async (req, res) => {
+  const { variable } = req.params;
+  const uri =
+    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+  const client = new MongoClient(uri);
+  const dbName = "adenyum"; // Veritabanı adı
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    const collection = db.collection("stratejikhedef"); // Koleksiyon adı
+    const results = await collection
+      .aggregate([
+        {
+          $group: {
+            _id: `$${variable}`, // KPI değerine göre gruplama
+            count: { $sum: 1 }, // Her grup için sayımı hesaplama
+          },
+        },
+      ])
+      .toArray();
+
+    res.json(results);
+  } catch (err) {
+    console.error("Hata:", err);
+  } finally {
+    await client.close();
+  }
+});
+
+app.post("/countRisk", async (req, res) => {
+  const uri =
+    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
+
+    const database = client.db("adenyum");
+    const collection = database.collection("riskanaliz");
+
+    const riskSinifiValue = "3"; // Saymak istediğiniz risk_sinifi değeri
+    const results = await collection
+      .aggregate([
+        { $match: { risk_sinifi: riskSinifiValue } }, // risk_sinifi ile filtreleme
+        {
+          $group: {
+            _id: "$departman", // Departmana göre gruplama
+            count: { $sum: 1 }, // Her grup için sayımı hesaplama
+          },
+        },
+      ])
+      .toArray();
+
+    // Sonuçları JSON formatında döndür
+    res.json(results);
+  } catch (err) {
+    console.error("Veri çekme hatası:", err);
+  } finally {
+    await client.close();
+  }
+});
+
+const startChangeStream = async () => {
+  const uri =
+    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority";
+
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
+    const database = client.db("adenyum");
+    const riskanalizCollection = database.collection("riskanaliz");
+    const kontrolNoktalariCollection = database.collection("kontrolnoktasi");
+
+    const changeStream = riskanalizCollection.watch();
+
+    changeStream.on("change", async (change) => {
+      // Change türünü kontrol et
+      if (change.operationType === "insert") {
+        const newDocument = change.fullDocument;
+
+        // risk_sinifi 3 olan dökümanları kontrol et
+        if (newDocument.risk_sinifi === "3") {
+          // Veriyi kontrol_noktalari koleksiyonuna ekle
+          await kontrolNoktalariCollection.insertOne(newDocument);
+          console.log(
+            "Yeni veri kontrol_noktalari koleksiyonuna eklendi:",
+            newDocument
+          );
+        }
+      }
+    });
+
+    console.log("Change Stream çalışıyor...");
+  } catch (error) {
+    console.error("Change Stream hata:", error);
+  }
+};
+
+startChangeStream();
+
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
