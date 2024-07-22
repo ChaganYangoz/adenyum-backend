@@ -265,7 +265,7 @@ app.post("/updateucret/:id", async (req, res) => {
     const updateDoc = {
       $set: {
         derece: updated.derece,
-        departman: updated.departman,
+        unvan: updated.unvan,
         agirlik: updated.agirlik,
         anamaas: updated.anamaas,
         performans: updated.performans,
