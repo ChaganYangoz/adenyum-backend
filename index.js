@@ -459,6 +459,9 @@ const startChangeStream = async () => {
 
         // risk_sinifi 3 olan dökümanları kontrol et
         if (newDocument.risk_sinifi === "3") {
+          newDocument.agirlik = "1";
+          newDocument.durum = "1";
+          newDocument.puan = "1";
           // Veriyi kontrol_noktalari koleksiyonuna ekle
           await kontrolNoktalariCollection.insertOne(newDocument);
           console.log(
