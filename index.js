@@ -449,6 +449,7 @@ const startChangeStream = async () => {
     const database = client.db("adenyum");
     const riskanalizCollection = database.collection("riskanaliz");
     const kontrolNoktalariCollection = database.collection("kontrolnoktasi");
+    const ucretYonetimiCollection = database.collection("ucretyonetimi");
 
     const changeStream = riskanalizCollection.watch();
 
@@ -456,14 +457,23 @@ const startChangeStream = async () => {
       // Change türünü kontrol et
       if (change.operationType === "insert") {
         const newDocument = change.fullDocument;
+        const newDocument2 = change.fullDocument;
 
         // risk_sinifi 3 olan dökümanları kontrol et
         if (newDocument.risk_sinifi === "3") {
           newDocument.agirlik = "1";
           newDocument.durum = "1";
           newDocument.puan = "1";
+          newDocument2.derece = "1.Derece";
+          newDocument2.agirlik = "1";
+          newDocument2.anamaas = "1";
+          newDocument2.performans = "1";
+          newDocument2.toplam_maas = "1";
+
           // Veriyi kontrol_noktalari koleksiyonuna ekle
           await kontrolNoktalariCollection.insertOne(newDocument);
+          await ucretYonetimiCollection.insertOne(newDocument2);
+
           console.log(
             "Yeni veri kontrol_noktalari koleksiyonuna eklendi:",
             newDocument
