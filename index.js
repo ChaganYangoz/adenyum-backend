@@ -458,14 +458,16 @@ const startChangeStream = async () => {
       if (change.operationType === "insert") {
         const newDocument = change.fullDocument;
         const newDocument2 = change.fullDocument;
+
         const currentDate = new Date();
+        const formattedDate = currentDate.toISOString().split("T")[0];
 
         // risk_sinifi 3 olan dökümanları kontrol et
         if (newDocument.risk_sinifi === "3") {
           newDocument.agirlik = "1";
           newDocument.durum = "1";
           newDocument.puan = "1";
-          newDocument.eklenme_tarihi = currentDate;
+          newDocument.eklenme_tarihi = formattedDate;
 
           newDocument2.derece = "1.Derece";
           newDocument2.agirlik = "1";
