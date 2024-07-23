@@ -458,12 +458,15 @@ const startChangeStream = async () => {
       if (change.operationType === "insert") {
         const newDocument = change.fullDocument;
         const newDocument2 = change.fullDocument;
+        const currentDate = new Date();
 
         // risk_sinifi 3 olan dökümanları kontrol et
         if (newDocument.risk_sinifi === "3") {
           newDocument.agirlik = "1";
           newDocument.durum = "1";
           newDocument.puan = "1";
+          newDocument.eklenme_tarihi = currentDate;
+
           newDocument2.derece = "1.Derece";
           newDocument2.agirlik = "1";
           newDocument2.anamaas = "1";
@@ -489,6 +492,46 @@ const startChangeStream = async () => {
 };
 
 startChangeStream();
+
+app.post("/departman-puan", async (req, res) => {
+  const uri =
+    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority";
+
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
+    const database = client.db("adenyum");
+    const collection = database.collection("kontrolnoktasi");
+
+    const aggregationPipeline = [
+      {
+        $addFields: {
+          puan: { $toInt: "$puan" }, // Convert puan from string to integer
+        },
+      },
+      {
+        $group: {
+          _id: "$departman", // Group by the 'departman' field
+          totalPuan: { $sum: "$puan" }, // Sum the 'puan' field for each group
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          departman: "$_id",
+          totalPuan: 1,
+        },
+      },
+    ];
+
+    const results = await collection.aggregate(aggregationPipeline).toArray();
+    res.json(results); // Send the results back to the client
+  } catch (error) {
+    console.error("Error fetching department scores:", error);
+  } finally {
+    await client.close();
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
