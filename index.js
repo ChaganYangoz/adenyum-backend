@@ -223,7 +223,7 @@ app.post("/updatekontrol/:id", async (req, res) => {
     const updateDoc = {
       $set: {
         departman: updated.departman,
-        kontrolnoktasi: updated.kontrolnoktasi,
+        tehlike: updated.tehlike,
         agirlik: updated.agirlik,
         durum: updated.durum,
         puan: updated.puan,
@@ -509,19 +509,39 @@ app.post("/departman-puan", async (req, res) => {
       {
         $addFields: {
           puan: { $toInt: "$puan" }, // Convert puan from string to integer
+          eklenmeTarihi: {
+            $dateFromString: {
+              dateString: "$eklenme_tarihi",
+              format: "%Y-%m-%d", // Adjust the format if your date format is different
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          week: { $isoWeek: "$eklenmeTarihi" },
         },
       },
       {
         $group: {
-          _id: "$departman", // Group by the 'departman' field
+          _id: {
+            departman: "$departman",
+            week: "$week",
+          },
           totalPuan: { $sum: "$puan" }, // Sum the 'puan' field for each group
         },
       },
       {
         $project: {
           _id: 0,
-          departman: "$_id",
+          departman: "$_id.departman",
+          week: "$_id.week",
           totalPuan: 1,
+        },
+      },
+      {
+        $sort: {
+          week: 1,
         },
       },
     ];
