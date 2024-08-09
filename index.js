@@ -1,5 +1,4 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const { MongoClient } = require("mongodb");
 const cors = require("cors");
 const { ObjectId } = require("mongodb");
@@ -10,13 +9,15 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 
+const uri =
+  "mongodb+srv://bilgiislem:IF6BzrsleZPqHDgw@cluster0.rigma.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+const database = "ekaldes";
 app.get("/list/:dbName", async (req, res) => {
   const { dbName } = req.params; // URL parametresinden dbName'i al
   try {
-    const client = await MongoClient.connect(
-      "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    );
-    const db = client.db("adenyum");
+    const client = await MongoClient.connect(uri);
+    const db = client.db(database);
     const sorumluCollection = db.collection(dbName);
     const sorumlular = await sorumluCollection.find({}).toArray();
     client.close();
@@ -30,10 +31,8 @@ app.get("/list/:dbName", async (req, res) => {
 app.post("/add/:dbName", async (req, res) => {
   const { dbName } = req.params; // URL parametresinden dbName'i al
   const { value } = req.body;
-  const client = await MongoClient.connect(
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  );
-  const db = client.db("adenyum");
+  const client = await MongoClient.connect(uri);
+  const db = client.db(database);
   const collection = db.collection(dbName);
 
   try {
@@ -46,10 +45,8 @@ app.post("/add/:dbName", async (req, res) => {
 
 app.post("/addSorumlu", async (req, res) => {
   const yeniKullanici = req.body;
-  const client = await MongoClient.connect(
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  );
-  const db = client.db("adenyum");
+  const client = await MongoClient.connect(uri);
+  const db = client.db(database);
   const collection = db.collection("sorumlu");
   try {
     const result = await collection.insertOne(yeniKullanici);
@@ -62,10 +59,8 @@ app.post("/addSorumlu", async (req, res) => {
 
 app.post("/addstratejik", async (req, res) => {
   const strathedef = req.body;
-  const client = await MongoClient.connect(
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  );
-  const db = client.db("adenyum");
+  const client = await MongoClient.connect(uri);
+  const db = client.db(database);
   const collection = db.collection("stratejikhedef");
 
   try {
@@ -78,10 +73,8 @@ app.post("/addstratejik", async (req, res) => {
 
 app.post("/addkontrol", async (req, res) => {
   const kontrol = req.body;
-  const client = await MongoClient.connect(
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  );
-  const db = client.db("adenyum");
+  const client = await MongoClient.connect(uri);
+  const db = client.db(database);
   const collection = db.collection("kontrolnoktasi");
 
   try {
@@ -94,10 +87,8 @@ app.post("/addkontrol", async (req, res) => {
 
 app.post("/addrisk", async (req, res) => {
   const risk = req.body;
-  const client = await MongoClient.connect(
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  );
-  const db = client.db("adenyum");
+  const client = await MongoClient.connect(uri);
+  const db = client.db(database);
   const collection = db.collection("riskanaliz");
 
   try {
@@ -110,10 +101,8 @@ app.post("/addrisk", async (req, res) => {
 
 app.post("/adducret", async (req, res) => {
   const ucret = req.body;
-  const client = await MongoClient.connect(
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  );
-  const db = client.db("adenyum");
+  const client = await MongoClient.connect(uri);
+  const db = client.db(database);
   const collection = db.collection("ucretyonetimi");
 
   try {
@@ -128,15 +117,12 @@ app.post("/update/:dbName", async (req, res) => {
   const { dbName } = req.params; // URL parametresinden dbName'i al
   const { id, value } = req.body;
 
-  const uri =
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
   const client = new MongoClient(uri);
 
   try {
     await client.connect(); // MongoDB'ye bağlan
 
-    const db = client.db("adenyum");
+    const db = client.db(database);
     const collection = db.collection(dbName);
 
     const filter = { _id: new ObjectId(id) }; // Güncellenecek belirli veriye göre filtrele
@@ -165,15 +151,12 @@ app.post("/updateSorumlu/:id", async (req, res) => {
   const { id } = req.params;
   const updateduser = req.body;
 
-  const uri =
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
   const client = new MongoClient(uri);
 
   try {
     await client.connect(); // MongoDB'ye bağlan
 
-    const db = client.db("adenyum");
+    const db = client.db(database);
     const collection = db.collection("sorumlu");
 
     const filter = { _id: new ObjectId(id) }; // Güncellenecek belirli veriye göre filtrele
@@ -207,15 +190,12 @@ app.post("/updatekontrol/:id", async (req, res) => {
   const { id } = req.params;
   const updated = req.body;
 
-  const uri =
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
   const client = new MongoClient(uri);
 
   try {
     await client.connect(); // MongoDB'ye bağlan
 
-    const db = client.db("adenyum");
+    const db = client.db(database);
     const collection = db.collection("kontrolnoktasi");
 
     const filter = { _id: new ObjectId(id) }; // Güncellenecek belirli veriye göre filtrele
@@ -249,15 +229,12 @@ app.post("/updateucret/:id", async (req, res) => {
   const { id } = req.params;
   const updated = req.body;
 
-  const uri =
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
   const client = new MongoClient(uri);
 
   try {
     await client.connect(); // MongoDB'ye bağlan
 
-    const db = client.db("adenyum");
+    const db = client.db(database);
     const collection = db.collection("ucretyonetimi");
 
     const filter = { _id: new ObjectId(id) }; // Güncellenecek belirli veriye göre filtrele
@@ -287,25 +264,23 @@ app.post("/updateucret/:id", async (req, res) => {
   }
 });
 
-app.post("/updatestrat", async (req, res) => {
+app.post("/updatestrat/:number", async (req, res) => {
   const { id } = req.body;
-
-  const uri =
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+  const { number } = req.params;
 
   const client = new MongoClient(uri);
 
   try {
     await client.connect(); // MongoDB'ye bağlan
 
-    const db = client.db("adenyum");
+    const db = client.db(database);
     const collection = db.collection("stratejikhedef");
 
     const filter = { _id: new ObjectId(id) }; // Güncellenecek belirli veriye göre filtrele
 
     const updateDoc = {
       $set: {
-        status: "1", // Yeni adı güncelle
+        status: number, // Yeni adı güncelle
       },
     };
 
@@ -326,11 +301,8 @@ app.post("/updatestrat", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { ad, sifre } = req.body;
 
-  const uri =
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
   const client = new MongoClient(uri);
-  const db = client.db("adenyum");
+  const db = client.db(database);
   try {
     const user = await db.collection("sorumlu").findOne({ ad });
 
@@ -351,15 +323,12 @@ app.post("/delete/:dbName", async (req, res) => {
   const { dbName } = req.params; // URL parametresinden dbName'i al
   const { id } = req.body;
 
-  const uri =
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
   const client = new MongoClient(uri);
 
   try {
     await client.connect(); // MongoDB'ye bağlan
 
-    const db = client.db("adenyum");
+    const db = client.db(database);
 
     const result = await db
       .collection(dbName)
@@ -379,11 +348,9 @@ app.post("/delete/:dbName", async (req, res) => {
 
 app.post("/count/:variable", async (req, res) => {
   const { variable } = req.params;
-  const uri =
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
   const client = new MongoClient(uri);
-  const dbName = "adenyum"; // Veritabanı adı
+  const dbName = database; // Veritabanı adı
   try {
     await client.connect();
     const db = client.db(dbName);
@@ -408,14 +375,12 @@ app.post("/count/:variable", async (req, res) => {
 });
 
 app.post("/countRisk", async (req, res) => {
-  const uri =
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
   const client = new MongoClient(uri);
   try {
     await client.connect();
 
-    const database = client.db("adenyum");
-    const collection = database.collection("riskanaliz");
+    const db = client.db(database);
+    const collection = db.collection("riskanaliz");
 
     const riskSinifiValue = "3"; // Saymak istediğiniz risk_sinifi değeri
     const results = await collection
@@ -440,16 +405,13 @@ app.post("/countRisk", async (req, res) => {
 });
 
 const startChangeStream = async () => {
-  const uri =
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority";
-
   const client = new MongoClient(uri);
   try {
     await client.connect();
-    const database = client.db("adenyum");
-    const riskanalizCollection = database.collection("riskanaliz");
-    const kontrolNoktalariCollection = database.collection("kontrolnoktasi");
-    const ucretYonetimiCollection = database.collection("ucretyonetimi");
+    const db = client.db(database);
+    const riskanalizCollection = db.collection("riskanaliz");
+    const kontrolNoktalariCollection = db.collection("kontrolnoktasi");
+    const ucretYonetimiCollection = db.collection("ucretyonetimi");
 
     const changeStream = riskanalizCollection.watch();
 
@@ -496,14 +458,11 @@ const startChangeStream = async () => {
 startChangeStream();
 
 app.post("/departman-puan", async (req, res) => {
-  const uri =
-    "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority";
-
   const client = new MongoClient(uri);
   try {
     await client.connect();
-    const database = client.db("adenyum");
-    const collection = database.collection("kontrolnoktasi");
+    const db = client.db(database);
+    const collection = db.collection("kontrolnoktasi");
 
     const aggregationPipeline = [
       {
