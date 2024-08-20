@@ -10,9 +10,9 @@ app.use(express.json());
 app.use(cors());
 
 const uri =
-  "mongodb+srv://caganyangoz:159753@cluster0.4sczhfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+  "mongodb+srv://bilgiislem:IF6BzrsleZPqHDgw@cluster0.rigma.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-const database = "adenyum";
+const database = "ekaldes";
 app.get("/list/:dbName", async (req, res) => {
   const { dbName } = req.params; // URL parametresinden dbName'i al
   try {
